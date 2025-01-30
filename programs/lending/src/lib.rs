@@ -3,6 +3,7 @@ use instructions::*;
 
 mod instructions;
 mod state;
+mod error;
 
 declare_id!("41w6fbpgZ5P7Ffh91rZNyKHXrf4LTBAxiUGi1dxNyZ2k");
 
@@ -21,4 +22,8 @@ pub mod lending {
     pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
         process_deposit(ctx, amount)
     }
+
+    pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
+        process_withdraw(ctx, amount)
+    } 
 }
