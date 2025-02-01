@@ -15,6 +15,7 @@ pub struct User {
   pub borrowed_usdc_share: u64,
   pub usdc_address: Pubkey,
   pub last_updated: i64,
+  pub last_updated_borrow: i64,
 
 }
 
