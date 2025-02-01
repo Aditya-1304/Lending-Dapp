@@ -41,6 +41,13 @@ pub struct Liquidate<'info>{
 
   #[account(
     mut,
+    seeds = [b"treasury",collateral_mint.key().as_ref()],
+    bump,
+  )]
+  pub collateral_bank_token_account : InterfaceAccount<'info,TokenAccount>,
+
+  #[account(
+    mut,
     seeds = [liquidator.key().as_ref()],
     bump,
   )]
@@ -116,7 +123,7 @@ pub fn process_liquidate(ctx: Context<Liquidate>) -> Result<()> {
   };
 
   let cpi_program = ctx.accounts.token_program.to_account_info();
-  let cpi_ctx = CpiContext::new(cpi_program,transfer_to_bank);
+  let cpi_ctx = CpiContext::new(cpi_program.clone(),transfer_to_bank);
   let decimals = ctx.accounts.borrowed_mint.decimals;
 
   let liquidation_amount = total_borrowed.checked_mul(borrowed_bank.liquidation_close_factor).unwrap();
@@ -141,7 +148,7 @@ pub fn process_liquidate(ctx: Context<Liquidate>) -> Result<()> {
   ];
 
   let cpi_ctx_to_liquidator = CpiContext::new(cpi_program.clone(), transfer_to_liquidator)
-    .with_signer(&[&signer_seeds]);
+    .with_signer(signer_seeds);
 
   let collateral_decimals = ctx.accounts.collateral_mint.decimals;
 
@@ -153,6 +160,6 @@ pub fn process_liquidate(ctx: Context<Liquidate>) -> Result<()> {
 pub fn calculate_accrued_interest(deposited: u64, interest_rate: u64, last_updated: i64)-> Result<u64> {
   let current_time = Clock::get()?.unix_timestamp;
   let time_diff = current_time - last_updated;
-  let new_value = (deposited as f64 * E.powf(interest_rate as f32 * time_diff as f32) as f64) as u64;
+  let new_value = (deposited as f64 * E.powf(interest_rate as f64 * time_diff as f64) as f64) as u64;
   Ok(new_value)
 }
